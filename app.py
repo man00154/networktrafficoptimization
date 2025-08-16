@@ -1,6 +1,5 @@
 # app.py
 import os
-import json
 import requests
 import streamlit as st
 from typing import List
@@ -46,7 +45,6 @@ def gemini_generate(api_key: str, prompt: str, max_tokens: int = 300) -> str:
     except Exception as e:
         return f"⚠️ Network/Request error: {e}"
 
-    # Extract text safely
     if "candidates" in data and data["candidates"]:
         cand = data["candidates"][0]
         parts = cand.get("content", {}).get("parts", [])
@@ -57,10 +55,7 @@ def gemini_generate(api_key: str, prompt: str, max_tokens: int = 300) -> str:
 
 # ---------- Agentic AI Pipeline ----------
 def agentic_network_optimizer(api_key: str, traffic_summary: str, rag: TinyRAG) -> str:
-    # Retrieve relevant KB
     context = " ".join(rag.retrieve(traffic_summary))
-
-    # Build prompt
     prompt = f"""
 You are an expert network AI assistant. Analyze the following network traffic data and summary:
 
@@ -80,18 +75,10 @@ Return a concise, structured report.
 """
     return gemini_generate(api_key, prompt, max_tokens=300)
 
-# ---------- Optional LangGraph ----------
-try:
-    import langgraph as lg
-    LANGGRAPH_AVAILABLE = True
-except Exception:
-    LANGGRAPH_AVAILABLE = False
-
 # ---------- Streamlit UI ----------
 st.set_page_config(page_title="Autonomous Network Optimizer", layout="wide")
-st.title("📡 MANISH - Autonomous Network Optimizer (Lightweight Demo)")
+st.title("📡 MANISH - DATA CENTER Autonomous Network Optimizer (Lightweight Demo)")
 
-# Input
 traffic_input = st.text_area(
     "Paste recent network traffic summary or logs:",
     height=200,
@@ -106,14 +93,7 @@ if st.button("Run Optimization"):
         st.warning("Please paste a network traffic summary.")
     else:
         rag = TinyRAG()
-        if LANGGRAPH_AVAILABLE:
-            g = lg.Graph()
-            g.add_node("network_input", {"length": len(traffic_input)})
         with st.spinner("Analyzing network traffic..."):
             report = agentic_network_optimizer(api_key, traffic_input.strip(), rag)
         st.subheader("📝 Optimization Report")
         st.markdown(report)
-        if LANGGRAPH_AVAILABLE:
-            g.add_node("optimizer_output", {"length": len(report)})
-            g.add_edge("network_input", "optimizer_output")
-            st.info("Pipeline recorded in LangGraph (local).")
