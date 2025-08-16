@@ -89,7 +89,7 @@ except Exception:
 
 # ---------- Streamlit UI ----------
 st.set_page_config(page_title="Autonomous Network Optimizer", layout="wide")
-st.title("📡 Autonomous Network Optimizer (Lightweight Demo)")
+st.title("📡 MANISH - Autonomous Network Optimizer (Lightweight Demo)")
 
 # Input
 traffic_input = st.text_area(
